@@ -23,28 +23,77 @@ if [ -f /usr/bin/pkcon ]; then
   sudo pkcon update -y
 fi
 
-sudo apt install libfuse2 fuse -y
+sudo apt install libfuse2 fuse3 -y
 
 CURSOR_API_URL="https://cursor.com/api/download?platform=linux-x64&releaseTrack=stable"
 CURSOR_DOWNLOAD_INFO=$(curl -s "$CURSOR_API_URL")
 CURSOR_DOWNLOAD_URL=$(echo "$CURSOR_DOWNLOAD_INFO" | grep -o '"downloadUrl":"[^"]*' | cut -d'"' -f4)
+CURSOR_DEB_URL=$(echo "$CURSOR_DOWNLOAD_INFO" | grep -o '"debUrl":"[^"]*' | cut -d'"' -f4)
+CURSOR_VERSION=$(echo "$CURSOR_DOWNLOAD_INFO" | grep -o '"version":"[^"]*' | cut -d'"' -f4)
 
-if [ -n "$CURSOR_DOWNLOAD_URL" ]; then
-    echo "Downloading Cursor..."
-    wget -O "$HOME/Downloads/Cursor.AppImage" "$CURSOR_DOWNLOAD_URL"
-    chmod +x "$HOME/Downloads/Cursor.AppImage"
-    
-    # Ask user preference
+if [ -n "$CURSOR_DOWNLOAD_URL" ] && [ -n "$CURSOR_DEB_URL" ]; then
+    echo "Cursor $CURSOR_VERSION detected"
     echo ""
-    echo "How would you like to use Cursor?"
-    echo "1) Extract and install to system (removes previous installations)"
-    echo "2) Use as AppImage with GearLever"
+    echo "How would you like to install Cursor?"
+    echo "1) Install .deb package (recommended - system integration)"
+    echo "2) Use AppImage with GearLever (portable)"
     echo ""
     read -p "Enter your choice (1 or 2): " choice
     
     case $choice in
         1)
-            echo "Extracting and installing Cursor to system..."
+            echo "Installing Cursor .deb package..."
+            
+            # Remove previous installations
+            if [ -d "$HOME/.local/share/cursor" ]; then
+                echo "Removing previous Cursor installation..."
+                rm -rf "$HOME/.local/share/cursor"
+            fi
+            
+            if [ -f "$HOME/.local/share/applications/cursor.desktop" ]; then
+                rm -f "$HOME/.local/share/applications/cursor.desktop"
+            fi
+            
+            if [ -f "/usr/local/bin/cursor" ]; then
+                sudo rm -f "/usr/local/bin/cursor"
+            fi
+
+            curl -fsSL https://chave.gpg.url | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/nome-da-chave.gpg > /dev/null
+            sudo mv /etc/apt/trusted.gpg /etc/apt/trusted.gpg.bak
+            sudo apt update -y
+            
+            # Download and install .deb package
+            echo "Downloading Cursor .deb package..."
+            wget -O "$HOME/Downloads/cursor_$CURSOR_VERSION.deb" "$CURSOR_DEB_URL"
+            
+            echo "Installing .deb package..."
+            sudo dpkg -i "$HOME/Downloads/cursor_$CURSOR_VERSION.deb"
+            
+            # Fix any dependency issues
+            sudo apt --fix-broken install -y
+            
+            # Clean up downloaded file
+            rm -f "$HOME/Downloads/cursor_$CURSOR_VERSION.deb"
+            
+            echo "Cursor successfully installed via .deb package!"
+            echo "You can now launch it from applications menu or run 'cursor' in terminal."
+            ;;
+        2)
+            echo "Downloading Cursor AppImage..."
+            wget -O "$HOME/Downloads/Cursor.AppImage" "$CURSOR_DOWNLOAD_URL"
+            chmod +x "$HOME/Downloads/Cursor.AppImage"
+            
+            # Install GearLever
+            echo "Installing GearLever..."
+            sudo apt install flatpak -y
+            flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo -y
+            flatpak install flathub it.mijorus.gearlever -y
+
+            flatpak run it.mijorus.gearlever "$HOME/Downloads/Cursor.AppImage"
+            echo "Cursor downloaded and opened in GearLever!"
+            ;;
+        *)
+            echo "Invalid choice. Installing .deb package by default..."
             
             # Remove previous installations
             if [ -d "$HOME/.local/share/cursor" ]; then
@@ -60,99 +109,23 @@ if [ -n "$CURSOR_DOWNLOAD_URL" ]; then
                 sudo rm -f "/usr/local/bin/cursor"
             fi
             
-            # Create temporary extraction directory
-            TEMP_DIR=$(mktemp -d)
-            cd "$TEMP_DIR"
+            # Download and install .deb package
+            echo "Downloading Cursor .deb package..."
+            wget -O "$HOME/Downloads/cursor_$CURSOR_VERSION.deb" "$CURSOR_DEB_URL"
             
-            # Extract AppImage
-            echo "Extracting AppImage..."
-            "$HOME/Downloads/Cursor.AppImage" --appimage-extract
+            echo "Installing .deb package..."
+            sudo dpkg -i "$HOME/Downloads/cursor_$CURSOR_VERSION.deb"
             
-            # Create installation directory
-            mkdir -p "$HOME/.local/share/cursor"
+            # Fix any dependency issues
+            sudo apt --fix-broken install -y
             
-            # Copy all extracted content including hidden files
-            echo "Installing Cursor files..."
-            cp -r squashfs-root/usr/share/cursor/* "$HOME/.local/share/cursor/"
+            # Clean up downloaded file
+            rm -f "$HOME/Downloads/cursor_$CURSOR_VERSION.deb"
             
-            # Copy icons to proper locations
-            mkdir -p "$HOME/.local/share/icons/hicolor"
-            if [ -d "squashfs-root/usr/share/icons/hicolor" ]; then
-                cp -r squashfs-root/usr/share/icons/hicolor/* "$HOME/.local/share/icons/hicolor/"
-            fi
-            
-            # Copy the main icon
-            if [ -f "squashfs-root/co.anysphere.cursor.png" ]; then
-                cp "squashfs-root/co.anysphere.cursor.png" "$HOME/.local/share/cursor/"
-            fi
-            
-            # Create desktop entry
-            cat > "$HOME/.local/share/applications/cursor.desktop" << EOF
-[Desktop Entry]
-Name=Cursor
-Comment=The AI Code Editor
-GenericName=Text Editor
-Exec=$HOME/.local/share/cursor/cursor %F
-Icon=$HOME/.local/share/cursor/co.anysphere.cursor.png
-Type=Application
-StartupNotify=false
-StartupWMClass=Cursor
-Categories=TextEditor;Development;IDE;
-MimeType=application/x-cursor-workspace;text/plain;inode/directory;
-Actions=new-empty-window;
-Keywords=cursor;
-
-[Desktop Action new-empty-window]
-Name=New Empty Window
-Exec=$HOME/.local/share/cursor/cursor --new-window %F
-Icon=$HOME/.local/share/cursor/co.anysphere.cursor.png
-EOF
-            
-            # Create wrapper script for command line access (detached from terminal)
-            echo "Creating terminal wrapper script..."
-            sudo tee /usr/local/bin/cursor > /dev/null << 'EOF'
-#!/usr/bin/env bash
-# Cursor wrapper script - launches detached from terminal
-exec setsid "$HOME/.local/share/cursor/cursor" "$@" >/dev/null 2>&1 &
-EOF
-            
-            # Make wrapper executable
-            sudo chmod +x /usr/local/bin/cursor
-            
-            # Update desktop database and icon cache
-            update-desktop-database "$HOME/.local/share/applications/" 2>/dev/null
-            gtk-update-icon-cache -f -t "$HOME/.local/share/icons/hicolor/" 2>/dev/null
-            
-            # Clean up
-            cd "$HOME"
-            rm -rf "$TEMP_DIR"
-            rm -f "$HOME/Downloads/Cursor.AppImage"
-    
-            echo "Cursor successfully installed to system!"
-            echo "Installation directory: $HOME/.local/share/cursor"
-            echo "Terminal wrapper: /usr/local/bin/cursor (detached execution)"
+            echo "Cursor successfully installed via .deb package!"
             echo "You can now launch it from applications menu or run 'cursor' in terminal."
-            echo "The terminal will be freed when using the 'cursor' command."
-            ;;
-        2)
-            # Open with GearLever
-            echo "Installing GearLever..."
-            sudo apt install flatpak -y
-            flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo -y
-            flatpak install flathub it.mijorus.gearlever -y
-
-            flatpak run it.mijorus.gearlever "$HOME/Downloads/Cursor.AppImage"
-            echo "Cursor downloaded and opened in GearLever!"
-            ;;
-        *)
-            echo "Invalid choice. Opening with GearLever by default..."
-            sudo apt install flatpak -y
-            flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo -y
-            flatpak install flathub it.mijorus.gearlever -y
-            flatpak run it.mijorus.gearlever "$HOME/Downloads/Cursor.AppImage"
-            echo "Cursor downloaded and opened in GearLever!"
             ;;
     esac
 else
-    echo "Error obtaining Cursor download URL"
+    echo "Error obtaining Cursor download information"
 fi
