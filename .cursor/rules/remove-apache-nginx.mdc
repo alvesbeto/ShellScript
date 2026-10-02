@@ -1,0 +1,18 @@
+---
+description: Registro da remoção dos servidores Apache e Nginx
+globs:
+  - removeApache.sh
+alwaysApply: false
+---
+
+# Remoção de servidores web
+
+## Alterações realizadas
+
+- O script `removeApache.sh` agora interrompe o serviço Nginx.
+- O início automático do Nginx é desabilitado.
+- Os pacotes `nginx` e `nginx-common` são removidos pelo APT.
+
+## Estado necessário
+
+- Nenhuma alteração adicional é necessária para o escopo solicitado.
