@@ -31,8 +31,8 @@ sudo apt update
 sudo apt install --install-recommends winehq-stable -y
 
 # Criando instância 32 bits do wine
-sudo rm -rf "/home/beto/.wine"
-WINEPREFIX="/home/beto/.wine" WINEARCH=win32 wine wineboot
+sudo rm -rf "$HOME/.wine"
+WINEPREFIX="$HOME/.wine" WINEARCH=win32 wine wineboot
 
 winetricks cmd corefonts msxml6 riched20 gdiplus dotnet452
 

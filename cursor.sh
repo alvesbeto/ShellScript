@@ -58,10 +58,6 @@ if [ -n "$CURSOR_DOWNLOAD_URL" ] && [ -n "$CURSOR_DEB_URL" ]; then
                 sudo rm -f "/usr/local/bin/cursor"
             fi
 
-            curl -fsSL https://chave.gpg.url | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/nome-da-chave.gpg > /dev/null
-            sudo mv /etc/apt/trusted.gpg /etc/apt/trusted.gpg.bak
-            sudo apt update -y
-            
             # Download and install .deb package
             echo "Downloading Cursor .deb package..."
             wget -O "$HOME/Downloads/cursor_$CURSOR_VERSION.deb" "$CURSOR_DEB_URL"
@@ -86,7 +82,7 @@ if [ -n "$CURSOR_DOWNLOAD_URL" ] && [ -n "$CURSOR_DEB_URL" ]; then
             # Install GearLever
             echo "Installing GearLever..."
             sudo apt install flatpak -y
-            flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo -y
+            flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
             flatpak install flathub it.mijorus.gearlever -y
 
             flatpak run it.mijorus.gearlever "$HOME/Downloads/Cursor.AppImage"
@@ -128,4 +124,5 @@ if [ -n "$CURSOR_DOWNLOAD_URL" ] && [ -n "$CURSOR_DEB_URL" ]; then
     esac
 else
     echo "Error obtaining Cursor download information"
+    exit 1
 fi

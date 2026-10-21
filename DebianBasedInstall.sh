@@ -88,12 +88,11 @@ sudo apt upgrade -y
 sudo apt dist-upgrade -y && sudo apt full-upgrade && sudo apt autoremove -y && sudo apt autoclean
 
 ## Download e instalaçao de programas externos ##
-mkdir "$DIRETORIO_DOWNLOADS"
+mkdir -p "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_GOOGLE_CHROME" -P "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_4K_VIDEO_DOWNLOADER" -P "$DIRETORIO_DOWNLOADS"
-wget -c "$ANYDESK" -P "$DIRETORIO_DOWNLOADS"
+wget -c "$URL_ANYDESK" -P "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_FDM" -P "$DIRETORIO_DOWNLOADS"
-wget -c "$URL_VCODE" -P "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_TERMIUS" -P "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_SKYPE" -P "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_WORKB" -P "$DIRETORIO_DOWNLOADS"

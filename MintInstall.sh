@@ -105,34 +105,33 @@ PROGRAMAS_PARA_INSTALAR=(
   net-tools
   openssl
   mcrypt
-  php8.1
-  php8.1-mcrypt
-  php8.1-common
-  php8.1-mysql
-  php8.1-sqlite3
-  php8.1-dom
-  php8.1-bcmath
-  php8.1-xml
-  php8.1-xmlrpc
-  php8.1-curl
-  php8.1-gd
-  php8.1-imagick
-  php8.1-cli
-  php8.1-dev
-  php8.1-imap
-  php8.1-mbstring
-  php8.1-opcache
-  php8.1-soap
-  php8.1-zip
-  php8.1-intl
-  php8.1-cgi
-  php8.1-pgsql
-  php8.1-ldap
+  php8.5
+  php8.5-mcrypt
+  php8.5-common
+  php8.5-mysql
+  php8.5-sqlite3
+  php8.5-dom
+  php8.5-bcmath
+  php8.5-xml
+  php8.5-xmlrpc
+  php8.5-curl
+  php8.5-gd
+  php8.5-imagick
+  php8.5-cli
+  php8.5-dev
+  php8.5-imap
+  php8.5-mbstring
+  php8.5-opcache
+  php8.5-soap
+  php8.5-zip
+  php8.5-intl
+  php8.5-cgi
+  php8.5-pgsql
+  php8.5-ldap
   nodejs
   gcc
   g++
   make
-  nodejs
   yarn
   npm
 )
@@ -174,10 +173,10 @@ sudo apt-add-repository "deb $URL_PPA_WINE focal main"
 sudo apt update -y && sudo apt upgrade -y && sudo apt dist-upgrade -y && sudo apt autoclean && sudo apt autoremove -y
 
 ## Download e instalaçao de programas externos ##
-mkdir "$DIRETORIO_DOWNLOADS"
+mkdir -p "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_GOOGLE_CHROME" -P "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_4K_VIDEO_DOWNLOADER" -P "$DIRETORIO_DOWNLOADS"
-wget -c "$ANYDESK" -P "$DIRETORIO_DOWNLOADS"
+wget -c "$URL_ANYDESK" -P "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_FDM" -P "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_VCODE" -P "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_SKYPE" -P "$DIRETORIO_DOWNLOADS"
@@ -187,9 +186,9 @@ wget -c "$URL_WORKB" -P "$DIRETORIO_DOWNLOADS"
 sudo dpkg -i $DIRETORIO_DOWNLOADS/*.deb
 
 # Instalar programas no apt
-for nome_do_programa in ${PROGRAMAS_PARA_INSTALAR[@]}; do
-  if ! dpkg -l | grep -q $nome_do_programa; then # Só instala se já não estiver instalado
-    apt install "$nome_do_programa" -y
+for nome_do_programa in "${PROGRAMAS_PARA_INSTALAR[@]}"; do
+  if ! dpkg -l | grep -q -- "$nome_do_programa"; then
+    sudo apt install "$nome_do_programa" -y
   else
     echo "[INSTALADO] - $nome_do_programa"
   fi

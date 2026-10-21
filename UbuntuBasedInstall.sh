@@ -32,6 +32,18 @@ URL_WORKB="https://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-workbench-com
 URL_WORKB2="https://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-workbench-community-dbgsym_8.0.40-1ubuntu24.04_amd64.deb"
 
 DIRETORIO_DOWNLOADS="$PASTA_USUARIO/Downloads/programas"
+CDN_BASE="https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master"
+
+chamar_ferramenta() {
+  local nome="$1"
+  local caminho
+  caminho="$(dirname "${BASH_SOURCE[0]}")/$nome"
+  if [[ -f "$caminho" ]]; then
+    bash "$caminho"
+    return
+  fi
+  bash -c "$(curl -fsSL "$CDN_BASE/$nome")"
+}
 
 ## Removendo travas eventuais do apt ##
 sudo rm /var/lib/dpkg/lock-frontend
@@ -94,9 +106,8 @@ sudo apt upgrade -y
 sudo apt dist-upgrade -y && sudo apt full-upgrade && sudo apt autoremove -y && sudo apt autoclean
 
 ## Download e instalaçao de programas externos ##
-mkdir "$DIRETORIO_DOWNLOADS"
+mkdir -p "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_FDM" -P "$DIRETORIO_DOWNLOADS"
-wget -c "$URL_VCODE" -P "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_TERMIUS" -P "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_WORKB" -P "$DIRETORIO_DOWNLOADS"
 wget -c "$URL_WORKB2" -P "$DIRETORIO_DOWNLOADS"
@@ -181,38 +192,9 @@ sudo apt install code -y # or code-insiders
 # Necessário para o flutter
 sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
 
-sh -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/betosouzace/ShellScript@master/php8.sh)"
-
-## Instalação do Postman ##
-echo "Instalando Postman..."
-wget -c "https://dl.pstmn.io/download/latest/linux_64" -O "$PASTA_USUARIO/postman-linux-x64.tar.gz"
-sudo tar -xzf "$PASTA_USUARIO/postman-linux-x64.tar.gz" -C /opt/
-sudo chmod 777 -R /opt/Postman/
-
-# Criando atalho do Postman na área de aplicações do usuário
-cat > "$PASTA_USUARIO/.local/share/applications/Postman.desktop" << 'EOT'
-[Desktop Entry]
-Encoding=UTF-8
-Name=Postman
-Exec=/opt/Postman/app/Postman %U
-Icon=/opt/Postman/app/resources/app/assets/icon.png
-Terminal=false
-Type=Application
-Categories=Development;
-EOT
-
-chown $USER:$USER "$PASTA_USUARIO/.local/share/applications/Postman.desktop"
-chmod 755 "$PASTA_USUARIO/.local/share/applications/Postman.desktop"
-
-# Removendo o arquivo tar.gz baixado
-rm -f "$PASTA_USUARIO/postman-linux-x64.tar.gz"
-
-echo "Postman instalado com sucesso!"
-
-# Docker
-sh -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/betosouzace/ShellScript@master/docker.sh)"
-
-sh -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/betosouzace/ShellScript@master/postman.sh)"
+chamar_ferramenta php8.sh
+chamar_ferramenta docker.sh
+chamar_ferramenta postman.sh
 
 # instalação Spotify
 curl -sS https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg | sudo apt-key add - 
@@ -229,7 +211,7 @@ sudo rm -rf "$PASTA_USUARIO/.wine"
 WINEPREFIX="$PASTA_USUARIO/.wine" WINEARCH=win32 wine wineboot
 
 ## Parar e remover serviço apache instalado com PHP 8 #
-sh -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/betosouzace/ShellScript@master/removeApache.sh)"
+chamar_ferramenta removeApacheNginx.sh
 
 sudo apt update -y
 
@@ -241,7 +223,9 @@ sudo apt upgrade -y
 sudo apt dist-upgrade -y && sudo apt full-upgrade && sudo apt autoremove -y && sudo apt autoclean
 
 ## Atalho Nodejs
-sudo ln -s /usr/bin/nodejs /usr/bin/node
+if [[ -x /usr/bin/nodejs && ! -e /usr/bin/node ]]; then
+  sudo ln -s /usr/bin/nodejs /usr/bin/node
+fi
 
 ## Instalacao Composer #
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -252,9 +236,8 @@ composer self-update
 
 flatpak install flathub io.podman_desktop.PodmanDesktop -y
 
-sh -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/betosouzace/ShellScript@master/cursor.sh)"
-
-sh -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/betosouzace/ShellScript@master/zsh.sh)"
+chamar_ferramenta cursor.sh
+chamar_ferramenta zsh.sh
 
 # Caso queira instalar o snap descomente as linhas abaixo
 # sudo rm /etc/apt/preferences.d/nosnap.pref

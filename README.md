@@ -5,36 +5,36 @@ Coleção de Shell Scripts
 
 via curl
 ```bash
-sh -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/UbuntuBasedInstall.sh)"
+bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/UbuntuBasedInstall.sh)"
 ```
 
 via wget
 ```bash
-sh -c "$(wget https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/UbuntuBasedInstall.sh -O -)"
+bash -c "$(wget https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/UbuntuBasedInstall.sh -O -)"
 ```
 
 ### Instalar e configurar o docker
 
 via curl
 ```bash
-sh -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/docker.sh)"
+bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/docker.sh)"
 ```
 
 via wget
 ```bash
-sh -c "$(wget https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/docker.sh -O -)"
+bash -c "$(wget https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/docker.sh -O -)"
 ```
 
 ### Instalar e configurar o cursor
 
 via curl
 ```bash
-sh -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/cursor.sh)"
+bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/cursor.sh)"
 ```
 
 via wget
 ```bash
-sh -c "$(wget https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/cursor.sh -O -)"
+bash -c "$(wget https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/cursor.sh -O -)"
 ```
 
 ### Instalar e configurar o ngrok
@@ -42,10 +42,10 @@ sh -c "$(wget https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/cursor.sh
 
 via curl
 ```bash
-sh -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/ngrok.sh)"
+bash -c "$(curl -fsSL https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/ngrok.sh)"
 ```
 
 via wget
 ```bash
-sh -c "$(wget https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/ngrok.sh -O -)"
+bash -c "$(wget https://cdn.jsdelivr.net/gh/alvesbeto/ShellScript@master/ngrok.sh -O -)"
 ```
